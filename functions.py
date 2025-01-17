@@ -1,6 +1,10 @@
 import numpy as np
 
 class tool:
+
+    def distancia(self, position_robot, position_oponent):
+      return ((position_robot[0] - position_oponent[0])**2 + (position_robot[1] - position_oponent[1])**2)**0.5
+    
     def criarVetor(self, pos_robot:tuple, pos_obs:tuple):
         vetor = np.array(pos_obs) - np.array(pos_robot)
         return vetor
