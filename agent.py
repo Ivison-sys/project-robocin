@@ -20,39 +20,56 @@ class ExampleAgent(BaseAgent, tool):
     def decision(self):
         if len(self.targets) == 0:
             return
+        
+        ponto_destino = self.targets[0]
 
-        target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.targets[0])
+        target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, ponto_destino)
         self.set_vel(target_velocity)
         self.set_angle_vel(target_angle_velocity)
         
-        opa= 100
+
         for op in self.opponents:
             position_op = (self.opponents[op].x, self.opponents[op].y)
             position_robo = (self.robot.x, self.robot.y)
+            vel_x, vel_y = target_velocity
+            
 
- 
-            if distancia(position_robo, position_op) <= 0.3:
-                print('colisão')
-                print(target_velocity)
-                vel_x, vel_y = target_velocity
+            dis = distancia(position_robo, position_op)
+            velocidades =  (vel_x, vel_y)
+            ang = self.calcularAngulo(position_op, self.robot, self.targets[0])
+            
+            
+            if dis <= 0.3 and ang <= 40:
+                velocidades = (vel_x/4, vel_y)
+
+            elif dis <= 0.54 and ang <= 40:
+                velocidades = (vel_x/2, vel_y)
+                self.set_vel(Point(velocidades[0], velocidades[1]))
+
+            if(distancia(position_op, ponto_destino) <= 0.2):
+                return
+
+            if dis <= 0.35:
+                sentido_desvio, eixo = self.calcularSentidoDesvio(position_op, (ponto_destino[0], ponto_destino[1]))
+                if dis <= 0.18:
+                    print(target_velocity)
+                    print(ang)
+
+                prop = velocidades[0] if (dis < 0.2) else 0
                 # a,b = Navigation.goToPoint(self.robot, Point(positon[0]+ang, positon[1]+ang))
-                ang = self.calcularDesvio(position_op, self.robot, self.targets[0])
-                if ang < 80 and op != opa:
-                    self.set_vel(Point(vel_x - 0.5, vel_y + 0.45))
-                if ang < 20:
-                    self.set_vel(Point(vel_x - 1.3, vel_y + 2))
-                    
-                         
-                                    
-                    
-                    
+                if ang <= 40:
+                    self.set_vel(Point(velocidades[0] - 1.3 - prop, (velocidades[1]+ 1.5)*sentido_desvio))
+                    print(sentido_desvio, eixo)
+
+                elif ang <= 80 and dis <= 0.25:
+                    self.set_vel(Point(velocidades[0] - 0.5 - prop, (velocidades[1] + 0.45)*sentido_desvio ))
+                    print(sentido_desvio, eixo)
+
                 
-                # self.set_vel(target_velocity)
-
-
 
         return
     
 
     def post_decision(self):
+        
         pass

@@ -4,6 +4,8 @@ from gymnasium.envs.registration import register
 from utils.CLI import cli, Difficulty
 import pygame
 
+## Aumentar eixo y e dimunuir x a medidia que a distancia diminui.
+
 args = cli()
 
 register(

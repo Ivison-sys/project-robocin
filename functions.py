@@ -21,11 +21,29 @@ class tool:
         angulo_graus = np.degrees(angulo_rad)
         
         return angulo_graus
-    
-    def calcularDesvio(self, oppenent, robot:dict, target:tuple):
+
+    def calcularAngulo(self, oppenent, robot:dict, target:tuple):
         robot_position = (robot.x, robot.y)
         destino = self.criarVetor(robot_position, target)
         colisao = self.criarVetor(robot_position, oppenent)
 
-        return self.angulo_entre_vetores(destino, colisao)
+        return  self.angulo_entre_vetores(destino, colisao)
+    
+    def calcularSentidoDesvio(self, pos_robot: tuple, pos_target: tuple):
+        destino = self.criarVetor(pos_robot, pos_target)
+        perp1 = self.angulo_entre_vetores([0,1], destino)
+        perp2 = self.angulo_entre_vetores([1,0], destino)
+
+        if(perp1 <= perp2):       
+            sentido = 1 if pos_target[0] >= pos_robot[0] else -1
+            sentido = sentido if pos_target[1] >= pos_robot[1] else sentido * -1
+            eixo = "eixo y"
+        else:
+            sentido = 1 if pos_target[1] >= pos_robot[1] else -1
+            sentido = sentido if pos_target[0] >= pos_robot[0] else sentido * -1
+            eixo = "eixo x"
+        
+        return sentido, eixo
+    
+
 
