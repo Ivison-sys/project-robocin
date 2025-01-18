@@ -5,28 +5,58 @@ from utils.Point import Point
 from functions import tool
 from time import sleep as sp
 import time
-# self.robot = primeiro, self.obstacles, self.teammates
-
-
 
 class ExampleAgent(BaseAgent, tool):
     def __init__(self, id=0, yellow=False):
         super().__init__(id, yellow)
+        self.ponto_destino = (0, 0)
+
     
     def decision(self):
         if len(self.targets) == 0:
             return
         
-        ponto_destino = self.targets[np.clip(self.robot.id, 0, len(self.targets)- 1)]
+        
+        robot_close_targets = {}
+        
+        for id_target in range(len(self.targets)):
+            menor_dist = 1000000
+            robot_close = -1
+            
+            for id_robot in range(len(self.teammates)): 
+                if id_robot not in robot_close_targets:               
+                    position_robot = (self.teammates[id_robot].x, self.teammates[id_robot].y)
+                    position_target =  self.targets[id_target]
+                    dist = self.distancia(position_robot, position_target)
+                    if dist < menor_dist:
+                        menor_dist = dist
+                        robot_close = id_robot
+                       
+                        
+            robot_close_targets.update({robot_close: id_target})             
+                    
+        
+       
+        
+        if self.robot.id not in robot_close_targets:
+            self.ponto_destino = -1
+            return
+                        
+        self.ponto_destino = self.targets[robot_close_targets[self.robot.id]]
 
-        target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, ponto_destino)
+        return
+    
+
+    def post_decision(self):
+        if self.ponto_destino == -1:
+            return
+
+        target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.ponto_destino)
         self.set_vel(target_velocity)
         self.set_angle_vel(target_angle_velocity)
-        
-        # print(self.teammates)
+
 
         
-
         for op in self.opponents:
             position_op = (self.opponents[op].x, self.opponents[op].y)
             position_robo = (self.robot.x, self.robot.y)
@@ -45,15 +75,14 @@ class ExampleAgent(BaseAgent, tool):
                 velocidades = (vel_x/2, vel_y)
                 self.set_vel(Point(velocidades[0], velocidades[1]))
 
-            if(self.distancia(position_op, ponto_destino) <= 0.2):
+            if(self.distancia(position_op, self.ponto_destino) <= 0.2):
                 return
 
             if dis <= 0.35:
-                sentido_desvio, eixo = self.calcularSentidoDesvio(position_op, (ponto_destino[0], ponto_destino[1]))
+                sentido_desvio, eixo = self.calcularSentidoDesvio(position_op, (self.ponto_destino[0], self.ponto_destino[1]))
                 
                 if dis <= 0.18:
-                    print(target_velocity)
-                    print(ang)
+                    print(f'robot {self.robot.id}: {ang:.2f}')
 
                 prop = velocidades[0] if (dis < 0.2) else 0
 
@@ -64,12 +93,6 @@ class ExampleAgent(BaseAgent, tool):
                 elif ang <= 80 and dis <= 0.25:
                     self.set_vel(Point(velocidades[0] - 0.5 - prop, (velocidades[1] + 0.45)*sentido_desvio ))
                     # print(sentido_desvio, eixo)
-
-                
-
+        
         return
     
-
-    def post_decision(self):
-        
-        pass

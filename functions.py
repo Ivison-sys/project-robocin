@@ -48,6 +48,4 @@ class tool:
             eixo = "eixo x"
         
         return sentido, eixo
-    
-
 
