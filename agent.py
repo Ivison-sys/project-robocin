@@ -1,4 +1,5 @@
 import numpy as np
+import threading
 from utils.ssl.Navigation import Navigation
 from utils.ssl.base_agent import BaseAgent
 from utils.Point import Point
@@ -10,7 +11,10 @@ class ExampleAgent(BaseAgent, tool):
     def __init__(self, id=0, yellow=False):
         super().__init__(id, yellow)
         self.ponto_destino = (0, 0)
-
+        self.tempo = time.time()
+        self.position_past = (0, 0)
+        self.ignore =  []
+        # print(self.position_past)
     
     def decision(self):
         if len(self.targets) == 0:
@@ -54,10 +58,30 @@ class ExampleAgent(BaseAgent, tool):
         target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.ponto_destino)
         self.set_vel(target_velocity)
         self.set_angle_vel(target_angle_velocity)
-
-
+    
+           
         
         for op in self.opponents:
+            if time.time() - self.tempo >= 4:
+                position_now = (self.robot.x, self.robot.y)
+                print(position_now, self.position_past)
+                if self.distancia(position_now, self.position_past) <= 0.2:
+                    print("loop detectado")
+                    self.tempo = time.time()
+                    self.ignore.append(self.opponents[op].id)
+                    
+                        
+                else:
+                    print("sem loop")
+                    self.ignore = []
+                
+                print(self.ignore)
+                self.tempo = time.time()
+                self.position_past = position_now  
+
+            if self.opponents[op].id in self.ignore:
+                return
+            
             position_op = (self.opponents[op].x, self.opponents[op].y)
             position_robo = (self.robot.x, self.robot.y)
             vel_x, vel_y = target_velocity
@@ -81,8 +105,8 @@ class ExampleAgent(BaseAgent, tool):
             if dis <= 0.35:
                 sentido_desvio, eixo = self.calcularSentidoDesvio(position_op, (self.ponto_destino[0], self.ponto_destino[1]))
                 
-                if dis <= 0.18:
-                    print(f'robot {self.robot.id}: {ang:.2f}')
+                # if dis <= 0.18:
+                    # print(f'robot {self.robot.id}: {ang:.2f}')
 
                 prop = velocidades[0] if (dis < 0.2) else 0
 
@@ -95,4 +119,7 @@ class ExampleAgent(BaseAgent, tool):
                     # print(sentido_desvio, eixo)
         
         return
+    
+ 
+        
     
