@@ -24,7 +24,7 @@ class ExampleAgent(BaseAgent, tool):
         robot_close_targets = {}
         
         for id_target in range(len(self.targets)):
-            menor_dist = 1000000
+            menor_dist = float("inf")
             robot_close = -1
             
             for id_robot in range(len(self.teammates)): 
@@ -62,20 +62,15 @@ class ExampleAgent(BaseAgent, tool):
            
         
         for op in self.opponents:
-            if time.time() - self.tempo >= 4:
+            if time.time() - self.tempo >= 3.5:
                 position_now = (self.robot.x, self.robot.y)
-                print(position_now, self.position_past)
                 if self.distancia(position_now, self.position_past) <= 0.2:
-                    print("loop detectado")
-                    self.tempo = time.time()
+                    print(f"Robô {self.robot.id}: loop detectado")
                     self.ignore.append(self.opponents[op].id)
-                    
-                        
+                    print(self.ignore)                        
                 else:
-                    print("sem loop")
                     self.ignore = []
                 
-                print(self.ignore)
                 self.tempo = time.time()
                 self.position_past = position_now  
 
