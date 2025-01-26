@@ -53,6 +53,7 @@ class ExampleAgent(BaseAgent, tool):
 
     def post_decision(self):
         if self.ponto_destino == -1:
+            self.tempo = time.time()
             return
 
         target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.ponto_destino)
